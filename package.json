@@ -1,0 +1,75 @@
+{
+  "name": "elizaos-plugin-cook4fun",
+  "version": "0.1.0",
+  "description": "ElizaOS plugin to launch and trade coins on cook4.fun (Robinhood chain, chainId 4663).",
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "license": "MIT",
+  "keywords": [
+    "elizaos",
+    "plugin",
+    "cook4fun",
+    "robinhood-chain",
+    "launchpad",
+    "defi",
+    "trading"
+  ],
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "viem": "^2.21.0"
+  },
+  "peerDependencies": {
+    "@elizaos/core": "^1.0.0"
+  },
+  "devDependencies": {
+    "@elizaos/core": "^1.0.0",
+    "@types/node": "^20.19.43",
+    "tsup": "^8.3.0",
+    "typescript": "^5.4.0"
+  },
+  "agentConfig": {
+    "pluginType": "elizaos:plugin:1.0.0",
+    "pluginParameters": {
+      "COOK4FUN_PRIVATE_KEY": {
+        "type": "string",
+        "description": "Agent wallet private key (0x-prefixed) holding ETH on the Robinhood chain. Used to sign launch/buy/sell transactions.",
+        "required": true,
+        "sensitive": true
+      },
+      "COOK4FUN_RPC_URL": {
+        "type": "string",
+        "description": "JSON-RPC endpoint for the Robinhood chain. Defaults to the public mainnet RPC.",
+        "required": false
+      },
+      "COOK4FUN_LAUNCHPAD_ADDRESS": {
+        "type": "string",
+        "description": "Launchpad contract address. Defaults to the live V2 launchpad.",
+        "required": false
+      },
+      "COOK4FUN_SLIPPAGE_BPS": {
+        "type": "string",
+        "description": "Default slippage tolerance in basis points for buys/sells (e.g. 1000 = 10%). Defaults to 1000.",
+        "required": false
+      }
+    }
+  }
+}
