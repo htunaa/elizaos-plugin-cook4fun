@@ -1,3 +1,5 @@
+![cook4.fun ElizaOS plugin](images/banner.jpg)
+
 # elizaos-plugin-cook4fun
 
 An [ElizaOS](https://elizaos.ai) plugin that lets an agent **launch and trade coins on [cook4.fun](https://cook4.fun)**, a Uniswap-V3-native launchpad on the Robinhood chain (chainId `4663`).
