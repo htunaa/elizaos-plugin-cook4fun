@@ -9,7 +9,7 @@ import {
 import { decodeEventLog, parseEther, type Address } from "viem";
 import { getConfig } from "../chain";
 import { LAUNCHPAD_ABI } from "../contracts";
-import { explorerTx, fmtEth, findSymbol } from "../utils";
+import { explorerTx, fmtEth, findSymbol, pinMetadata } from "../utils";
 
 // TokenCreated(uint256 indexed i, address indexed t, address indexed c, ...)
 const TOKEN_CREATED_ABI = [
@@ -79,8 +79,18 @@ export const launchCoin: Action = {
       const twitter: string = options?.twitter ?? "";
       const telegram: string = options?.telegram ?? "";
       const website: string = options?.website ?? "";
-      const metadataUrl: string = options?.metadataUrl ?? options?.md ?? "";
       const distribute: boolean = options?.distribute ?? false;
+
+      // Pin the metadata JSON (ERC-7572) unless the caller supplied one.
+      // Terminals read the coin's picture and socials from this; launching
+      // without it leaves contractURI empty and the coin shows up with no
+      // image anywhere. cook4.fun also copies the image onto IPFS here.
+      let metadataUrl: string = options?.metadataUrl ?? options?.md ?? "";
+      if (!metadataUrl) {
+        metadataUrl = await pinMetadata(cfg.apiBase, {
+          name, symbol, description, image, twitter, telegram, website,
+        });
+      }
 
       const firstBuyEth = options?.firstBuyEth ?? 0;
       const firstBuy = firstBuyEth ? parseEther(String(firstBuyEth)) : 0n;

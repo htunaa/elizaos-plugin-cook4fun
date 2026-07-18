@@ -23,6 +23,8 @@ export type Cook4funConfig = {
   launchpad: Address;
   rpcUrl: string;
   slippageBps: bigint;
+  /** cook4.fun origin used to pin token metadata (ERC-7572) at launch. */
+  apiBase: string;
 };
 
 /**
@@ -92,5 +94,7 @@ export function getConfig(runtime: IAgentRuntime): Cook4funConfig {
     transport: http(rpcUrl),
   });
 
-  return { account, publicClient, walletClient, launchpad, rpcUrl, slippageBps };
+  const apiBase = (setting(runtime, "COOK4FUN_API_URL") ?? "https://cook4.fun").replace(/\/+$/, "");
+
+  return { account, publicClient, walletClient, launchpad, rpcUrl, slippageBps, apiBase };
 }
