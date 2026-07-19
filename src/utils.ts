@@ -164,5 +164,5 @@ export async function pinMetadata(apiBase: string, meta: TokenMetadata): Promise
 
 /** Blockscout tx link for the Robinhood chain. */
 export function explorerTx(hash: string): string {
-  return `https://blockscout.mainnet.chain.robinhood.com/tx/${hash}`;
+  return `https://robinhoodchain.blockscout.com/tx/${hash}`;
 }
