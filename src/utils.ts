@@ -1,6 +1,50 @@
-import { formatEther, isAddress, type Address } from "viem";
+import {
+  concat,
+  encodeAbiParameters,
+  formatEther,
+  getContractAddress,
+  isAddress,
+  keccak256,
+  parseAbiParameters,
+  type Address,
+  type Hex,
+} from "viem";
 import type { Cook4funConfig } from "./chain";
 import { LAUNCHPAD_ABI } from "./contracts";
+
+// A coin is an EIP-1167 clone, so its address is decided by a salt we pick before
+// sending the launch. The clone's init code is constant, so the launchpad mixes
+// the sender in (keccak256(sender, salt)) — that is why the same salt lands on a
+// different address for a different caller and nobody can front-run a ground one.
+const PROXY_PREFIX = "0x3d602d80600a3d3981f3363d3d373d3d3d363d73" as const;
+const PROXY_SUFFIX = "0x5af43d82803e903d91602b57fd5bf3" as const;
+
+/**
+ * Grinds a salt so the launched coin's address ends in `c00c`, the cook4.fun
+ * signature every coin carries. Falls back to any salt after `budgetMs` so a
+ * launch is never blocked just because the pretty address was slow.
+ */
+export function grindSalt(
+  creator: Address,
+  launchpad: Address,
+  implementation: Address,
+  budgetMs = 6000,
+): Hex {
+  const bytecodeHash = keccak256(concat([PROXY_PREFIX, implementation, PROXY_SUFFIX]));
+  const started = Date.now();
+  let i = Math.floor(Math.random() * 1e9) + 1;
+  let salt = `0x${i.toString(16).padStart(64, "0")}` as Hex;
+  while (Date.now() - started < budgetMs) {
+    salt = `0x${i.toString(16).padStart(64, "0")}` as Hex;
+    const derived = keccak256(
+      encodeAbiParameters(parseAbiParameters("address, bytes32"), [creator, salt]),
+    );
+    const address = getContractAddress({ opcode: "CREATE2", from: launchpad, salt: derived, bytecodeHash });
+    if (address.toLowerCase().endsWith("c00c")) return salt;
+    i++;
+  }
+  return salt; // ordinary address, launch anyway
+}
 
 /** Pull the first 0x… 20-byte address out of a blob of text, if any. */
 export function findAddress(text: string): Address | undefined {
@@ -53,7 +97,7 @@ export type LaunchpadToken = {
   symbol: string;
   imageUrl: string;
   createdAt: bigint;
-  pool: Address;
+  poolId: Hex;
   distribute: boolean;
 };
 
@@ -75,7 +119,7 @@ export async function fetchTokens(
     symbol: t.symbol as string,
     imageUrl: t.imageUrl as string,
     createdAt: t.createdAt as bigint,
-    pool: t.pool as Address,
+    poolId: t.poolId as Hex,
     distribute: t.distribute as boolean,
   }));
 }

@@ -8,8 +8,8 @@ import {
 } from "@elizaos/core";
 import { decodeEventLog, parseEther, type Address } from "viem";
 import { getConfig } from "../chain";
-import { LAUNCHPAD_ABI } from "../contracts";
-import { explorerTx, fmtEth, findSymbol, pinMetadata } from "../utils";
+import { DEFAULT_TOKEN_IMPLEMENTATION, LAUNCHPAD_ABI } from "../contracts";
+import { explorerTx, fmtEth, findSymbol, grindSalt, pinMetadata } from "../utils";
 
 // TokenCreated(uint256 indexed i, address indexed t, address indexed c, ...)
 const TOKEN_CREATED_ABI = [
@@ -40,7 +40,7 @@ export const launchCoin: Action = {
   name: "COOK4FUN_LAUNCH",
   similes: ["LAUNCH_COIN", "CREATE_TOKEN", "DEPLOY_COIN", "LAUNCH_ON_COOK4FUN", "MINT_COIN"],
   description:
-    "Launch a brand new coin on cook4.fun. Deploys the token, opens its Uniswap V3 pool, and optionally makes a first buy. Needs a name and ticker; description, image, socials, and an initial buy are optional.",
+    "Launch a brand new coin on cook4.fun. Deploys the token, opens its Uniswap V4 pool, and optionally makes a first buy. Needs a name and ticker; description, image, socials, and an initial buy are optional.",
 
   validate: async (runtime: IAgentRuntime) => {
     return !!(
@@ -110,6 +110,10 @@ export const launchCoin: Action = {
         }.`,
       );
 
+      // Grind a c00c vanity salt (the sender is mixed in on-chain, so this only
+      // resolves for us). Empty split: the agent keeps its whole 75% creator fee.
+      const salt = grindSalt(cfg.account.address, cfg.launchpad, DEFAULT_TOKEN_IMPLEMENTATION);
+
       const hash = await cfg.walletClient.writeContract({
         address: cfg.launchpad,
         abi: LAUNCHPAD_ABI,
@@ -125,6 +129,8 @@ export const launchCoin: Action = {
           distribute,
           firstBuy,
           metadataUrl,
+          salt,
+          [],
         ],
         value,
         account: cfg.account,
