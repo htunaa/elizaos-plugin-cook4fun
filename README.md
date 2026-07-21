@@ -2,11 +2,11 @@
 
 # elizaos-plugin-cook4fun
 
-An [ElizaOS](https://elizaos.ai) plugin that lets an agent **launch and trade coins on [cook4.fun](https://cook4.fun)**, a Uniswap-V3-native launchpad on the Robinhood chain (chainId `4663`).
+An [ElizaOS](https://elizaos.ai) plugin that lets an agent **launch and trade coins on [cook4.fun](https://cook4.fun)**, a Uniswap-V4-native launchpad on the Robinhood chain (chainId `4663`).
 
 Give your agent a funded wallet and it can:
 
-- 🚀 **Launch** a new coin (deploys the token + opens its V3 pool, optional first buy)
+- 🚀 **Launch** a new coin (deploys the token + opens its V4 pool, optional first buy)
 - 🟢 **Buy** any cook4.fun coin with ETH (slippage-protected)
 - 🔴 **Sell** back to ETH (by amount, percentage, or "all"; auto-approves)
 - 💰 **Claim** reward-sharing fees
@@ -34,7 +34,7 @@ Set these as character secrets or environment variables:
 |---|---|---|---|
 | `COOK4FUN_PRIVATE_KEY` | ✅ | none | Agent wallet private key (`0x…`, 32 bytes). **Needs ETH on chain 4663** for the launch fee, gas, and buys. |
 | `COOK4FUN_RPC_URL` | no | `https://rpc.mainnet.chain.robinhood.com` | Custom RPC endpoint. |
-| `COOK4FUN_LAUNCHPAD_ADDRESS` | no | `0xc12F…A352` (live V2) | Override the launchpad contract. |
+| `COOK4FUN_LAUNCHPAD_ADDRESS` | no | `0xcdC8…Ff47` (live V4) | Override the launchpad contract. |
 | `COOK4FUN_SLIPPAGE_BPS` | no | `1000` (10%) | Default slippage tolerance for buys/sells, in basis points. |
 
 > ⚠️ **Security:** the agent can spend everything in this wallet. Fund it with only what you're comfortable letting the agent trade, and treat the private key like any other secret.
