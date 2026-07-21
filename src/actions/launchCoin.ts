@@ -75,7 +75,9 @@ export const launchCoin: Action = {
       }
 
       const description: string = options?.description ?? "";
-      const image: string = options?.image ?? options?.imageUrl ?? "";
+      // Default the on-chain image to whatever was passed; upgraded to the pinned
+      // IPFS copy below so it outlives the caller's (often temporary) host.
+      let image: string = options?.image ?? options?.imageUrl ?? "";
       const twitter: string = options?.twitter ?? "";
       const telegram: string = options?.telegram ?? "";
       const website: string = options?.website ?? "";
@@ -87,9 +89,11 @@ export const launchCoin: Action = {
       // image anywhere. cook4.fun also copies the image onto IPFS here.
       let metadataUrl: string = options?.metadataUrl ?? options?.md ?? "";
       if (!metadataUrl) {
-        metadataUrl = await pinMetadata(cfg.apiBase, {
+        const pinned = await pinMetadata(cfg.apiBase, {
           name, symbol, description, image, twitter, telegram, website,
         });
+        metadataUrl = pinned.uri;
+        if (pinned.image) image = pinned.image; // durable IPFS copy for the on-chain field
       }
 
       const firstBuyEth = options?.firstBuyEth ?? 0;
